@@ -1,13 +1,20 @@
-const express = require('express')
 require('./config/database')
-const port = 3030
+const express = require('express')
+require('dotenv').config()
+const cors = require('cors')
 
-const app =express()
+const PORT = process.env.PORT || 3030
 
-app.use(express.json)
-app.use('/api/v1',user)
+const userRouter = require('./routes/user')
 
-app.listen(port,()=>{
-    console.log(`server is listening to port ${port}`);
+const app = express()
+
+app.use(cors())
+app.use(express.json())
+
+app.use('/api/v1',userRouter)
+
+app.listen(PORT,()=>{
+    console.log(`server is listening to port ${PORT}`);
     
 })

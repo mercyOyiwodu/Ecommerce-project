@@ -1,194 +1,298 @@
 const userModel = require('../models/user')
-const bcrypt  = require('bcryptjs')
+// const bcrypt  = require('bcryptjs')
+const sendEmail = require('../middlewares/nodemailer')
+// const jwt = require('jsonwebtoken')
+const bcrypt  = require('bcrypt')
 const jwt =require('jsonwebtoken')
-const { signUpTemplate ,forgotPassworTemplate } =require('../utils/mailTemplates')
+const { signUpTemplate ,forgotTemplate } = require('../utils/mailTemplates')
+const {validate} = require('../helper/utilities')
+const {registerSchema, loginSchema, verificationEmailSchema, forgotPasswordSchema, resetPasswordschema} = require('../validation/user')
+
+
+
+
+
 
 exports.register = async (req, res) => {
     try {
-        const { fullName, email, password } = req.body
-        const user = await userModel.findOne({email: email.toLowerCase()})
-        if (user){
-            return res.status(400).json({
-                message: 'User Already exists'
-            })
+        
+        const validated = await validate(req.body , registerSchema)
+        
+        const {fullName, email, password, confirmPassword} = validated
+
+        if(password !== confirmPassword) {
+            return res.status(400).json({message: 'passwords do not match'})
         }
+
+        const user = await userModel.findOne({ email: email.toLowerCase()})
+
+        if(user) {
+            return res.status(400).json({message: `user with email: ${email} already exists`})
+        }
+
         const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(password,salt)
-        const newUser = await userModel({
+        const hashedPassword = await bcrypt.hash(password, salt)
+
+     
+
+        const newUser = new userModel({
             fullName,
             email,
-            password : hashedPassword
+            password: hashedPassword,
+            
+        
         })
-        const token = jwt.sign({userId:user._id},process.env.JWT_SECRET, {expiresIn : '1d'})
-        const link = `${req.protocol}://${req.get('host')}/api/v1/register/${token}`
-        const firstName = user.fullName.split('')[0]
-        const mailOptions = {
-            email: user.email,
-            subject: 'Welcome to our platform',
-            message
-        }
-        await sendEmail(mailOptions)
-        await user.save()
 
-        res.status(201).json({
-            message: 'User Created successfully',
-            data : newUser
-        })
+
+        const token = await jwt.sign({ userId: newUser._id}, process.env.JWT_SECRET, { expiresIn: '1day'})
+
+        const link = `${req.protocol}://${req.get('host')}/api/v1/user-verify/${token}`
+
+        const firstName = newUser.fullName.split(' ')[1]
+
+
+        const mailDetails = {
+            subject: 'Welcome Email',
+            email: newUser.email,
+            html : signUpTemplate(link, firstName)
+        }
+
+        await sendEmail(mailDetails)
+
+        await newUser.save()
+
+        res.status(201).json({message: 'user registered successfully', data: newUser, token})
 
     } catch (error) {
-        res.status(500).json({
-            message:'Internal Server Error' + error.message
-        })
+        console.log(error.message)
+        res.status(500).json({message: 'internal server error',  error: error.message})
+        
     }
 }
+
+
+
+
+exports.login = async (req, res) => {
+    try {
+        const validated = await validate(req.body , loginSchema)
+
+        const {email, password} = validated
+
+        if(!email) {
+            return res.status(400).json({message: 'please enter email'})    
+        }
+
+        if(!password) {
+            return res.status(400).json({message: 'please enter your password'})    
+        }
+
+        const user = await userModel.findOne({  email: email.toLowerCase()})
+
+        if(user === null) {
+            return res.status(404).json({message: 'user not found'})  
+        }
+
+        const isPasswordCorrect = await bcrypt.compare(password, user.password)
+
+        if(isPasswordCorrect === false) {
+            return res.status(400).json({message: 'incorrect password'})  
+        }
+
+        if(user.isVerified === false) {
+            return res.status(400).json({message: 'account not verified, please check your email for link'})  
+        }
+
+
+        const token = await jwt.sign({userId: user._id}, process.env.JWT_SECRET, { expiresIn:'1day'})
+
+        res.status(200).json({message: 'login successful', data: user, token})
+
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({message: 'internal server error' , error: error.message})
+    }
+}
+
+
+
+
 
 exports.verifyEmail = async (req, res) => {
     try {
-        const { token } = req.params;
-        if (!token) {
-            return res.status(400).json({
-                message: 'Token not found'
-            })
-        };
-        const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await userModel.findById(decodedToken.userId);
-        if (!user) {
-            return res.status(404).json({
-                message: 'User not found'
-            })
-        };
+        
+        const {token}  = req.params
 
-        user.isVerified = true;
-        await user.save()
-        res.status(200).json({
-            message: 'User verified successfully'
-        })
-    }
-    catch (error) {
-        console.log(error.message)
-        if (error instanceof jwt.JsonWebTokenError) {
-            return res.status(401).json({
-                message: 'Verification link expired'
-            })
+        if(!token) {
+            return res.status(400).json({message: 'token not found'})
         }
-        res.status(500).json({
-            message: 'Error verifying User: ' + error.message
-        })
+
+        const decodedToken = await jwt.verify(token, process.env.JWT_SECRET)
+
+        const user = await userModel.findById(decodedToken.userId)
+
+        if(!user) {
+            return res.status(404).json({message: 'user not found'})
+        }
+
+        if(user.isVerified === true) {
+            return res.status(400).json({message: 'user has already been verified'})
+        }
+
+        user.isVerified = true
+
+        await user.save()
+
+        res.status(200).json({message: 'user verified successfully'})
+
+
+    } catch (error) {
+        console.log(error.message)
+        if(error instanceof jwt.JsonWebTokenError) {
+            return res.status(401).json({message: 'verification link expired'})
+        }
+    }
+    res.status(500).json({message: 'error verifying user:' , error:error.message})
+}
+
+
+
+
+exports.resendVerificationEmail = async (req, res) => {
+    try {
+        
+        const validated = await validate(req.body , verificationEmailSchema)
+
+        const {email} = validated
+
+        if(!email) {
+            return res.status(400).json({message: 'please enter email address'})
+        }
+
+        const user = await userModel.findOne({email: email.toLowerCase()})
+
+        if(!user) {
+            return res.status(404).json({message: 'user not found'})
+        }
+
+        const token = await jwt.sign({ userId: user._id}, process.env.JWT_SECRET, { expiresIn: '1h'})
+
+        const link = `${req.protocol}://${req.get('host')}/api/v1/user-verify/${token}`
+
+        const firstName = user.fullName.split('')[1]
+
+        const html = signUpTemplate(link, firstName)
+
+        const mailOptions = {
+            subject: 'email verification',
+            email: user.email,
+            html
+        }
+
+        await sendEmail(mailOptions)
+
+        res.status(200).json({message: 'verification email sent, please check mail box'})
+
+
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({message: 'error resending verification email' + error.message})
     }
 }
+
+
 
 
 exports.forgotPassword = async (req, res) => {
     try {
-        const { email } = req.body
-        if (!email) {
-            return res.status(400).json({
-                message: 'Please enter email address'
-            });
-        }
-        const user = await userModel.findOne({ email: email.toLowerCase() })
-        if (user === null) {
-            res.status(404).json({
-                message: 'User Not Found'
-            })
-        }
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' })
-        const link = `${req.protocol}://${req.get('host')}/api/v1/reset-password/${token}`
-        const firstName = user.fullName.split(' ')[0]
-        const mailOptions = {
-            subject: 'Password Reset',
-            email: user.email,
-            html: forgotPasswordTemplate(link, firstName)
-        }
-        await sendEmail(mailOptions)
-        res.status(200).json({
-            message: 'Password reset link initiated, Please check your mail box'
+
+      const validated = await validate(req.body , forgotPasswordSchema)
+
+      const { email } = validated
+
+      const user = await userModel.findOne({ email: email.toLowerCase() });
+  
+      if (!user) {
+        return res.status(404).json({
+          message: 'Account not found'
         })
+      };
+  
+      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '10mins' });
+      const link = `${req.protocol}://${req.get('host')}/api/v1/reset-password/${token}`; // consumed post link
+      const firstName = user.fullName.split(' ')[0];
+  
+      const mailOptions = {
+        email: user.email,
+        subject: 'Reset Password',
+        html: forgotTemplate(link, firstName)
+      };
+  
+      await sendEmail(mailOptions);
+      return res.status(200).json({
+        message: 'Link has been sent to email address'
+      })
     } catch (error) {
-        console.log(error.message);
-        if (error instanceof jwt.JsonWebTokenError) {
-            res.status(401).json({
-                message: 'Verificarion link expired'
-            })
-        }
-        res.status(500).json({
-            message: 'Error Logging in User'
-        });
+      console.log(error.message);
+      res.status(500).json({
+        message: 'Forgot password failed',
+        error: error.message
+      })
     }
-}
+  };
+  
 
-exports.resetPassword = async (req, res) => {
+
+
+  
+  exports.resetPassword = async (req, res) => {
     try {
-        const { token } = req.params;
-
-        const { password, confirmPassword } = req.body;
-        const { userId } = jwt.verify(token, process.env.JWT_SECRET,{expiresIn:'1h'})
-        const user = await userModel.findById(userId)
-        if (!user) {
-            return res.status(404).json({
-                message: 'User not found'
-            })
-        }
-        if (password !== confirmPassword) {
-            return res.status(400).json({
-                message: 'Password do not match'
-            });
-        }
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt)
-        user.password = hashedPassword
-        await user.save();
-
-        res.status(200).json({
-            message: 'Password reset successful'
+      const { token } = req.params;
+  
+      if (!token) {
+        return res.status(404).json({
+          message: 'Token not found'
         })
-
+      };
+      const validated = await validate(req.body , resetPasswordschema)
+      
+      const { password, confirmPassword } = validated
+  
+      if (password !== confirmPassword) {
+        return res.status(400).json({
+          message: 'Password does not match'
+        })
+      };
+  
+      const { userId } = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await userModel.findById(userId);
+  
+      if (!user) {
+        return res.status(404).json({
+          message: 'Account not found'
+        })
+      };
+  
+      const saltedRound = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, saltedRound);
+      user.password = hashedPassword;
+      await user.save();
+  
+      res.status(200).json({
+        message: 'Password changed successfully'
+      });
     } catch (error) {
-        console.log(error.message);
-        if (error instanceof jwt.JsonWebTokenError) {
-            return res.status(401).json({
-                message: 'Verification link expired'
-            })
-        }
-        res.status(500).json({
-            message: 'Error reseting password'
-        });
-
+      console.log(error.message);
+      if (error instanceof jwt.JsonWebTokenError) {
+        return res.status(400).json({
+          message: 'Session expired. Please enter your email to resend link'
+        })
+      };
+      res.status(500).json({
+        message: 'Error resetting password',
+        error: error.message
+      })
     }
-}
-
-exports.login = async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await userModel.findOne({ email: email.toLowerCase() });
-        if (user === null) {
-            return res.status(404).json({
-                message: `User with email: ${email} does not exist`
-            });
-        }
-        const isCorrectPassword = await bcrypt.compare(password, user.password);
-        if (isCorrectPassword === false) {
-            return res.status(400).json({
-                message: "Incorrect Password"
-            });
-        }
-        if (user.isVerified === false) {
-            return res.status(400).json({
-                message: "User not verified, Please check your email to verify"
-            });
-        }
-        const token =  jwt.sign({ userId: userExists._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-        res.status(200).json({
-            message: 'Login successful',
-            data: user,
-            token
-        });
-    } catch (error) {
-        res.status(500).json({
-            message: 'Error Logging in User',
-            data : error.message
-        });
-    }
-};
-
+  };
+  
 
