@@ -1,10 +1,14 @@
-const mongoose =require('mongoose')
 require('dotenv').config()
-const db= process.env.MONGO_DB
-mongoose.connect(db)
-.then(()=>{
-    console.log('Connection To The Database Has Been Established Successfully');
+const mongoose = require('mongoose');
+
+const DB = process.env.MONGODB_URI
+
+mongoose.connect(DB)
+
+.then(() => { 
+    console.log('Connection to database is successful')
 })
-.catch((err)=>{
-    console.log('Error Connecting To Database' + err.message)
+
+.catch((error) => {
+    console.log('Connection to database is not succesful' + error.message)
 })

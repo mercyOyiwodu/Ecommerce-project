@@ -1,11 +1,11 @@
-const signUpTemplate =(verifyLink,firstName)=>{
+exports.signUpTemplate = (verifyLink,firstName)=>{
     return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Cohort 5 Class </title>
+        <title>luxefeet </title>
         <style>
             body {
                 font-family: Arial, sans-serif;
@@ -68,17 +68,17 @@ const signUpTemplate =(verifyLink,firstName)=>{
     <body>
         <div class="container">
             <div class="header">
-                <h1>Blog Application</h1>
+                <h1>luxefeet</h1>
             </div>
             <div class="content">
                 <p>Hello ${firstName},</p>
-                <p>Thank you for signing up on my application. We are excited to have you on board.</p>
+                <p>Thank you for signing up on luxefeet collections. We are excited to have you on board.</p>
                 <p>Please click the button below to verify your account:</p>
                 <div class="button-container">
                     <a href="${verifyLink}" class="button">Verify My Account</a>
                 </div>
                 <p>If you did not sign up on our platform, kindly ignore this email.</p>
-                <p>Best regards,<br>Abu Mercy team</p>
+                <p>Best regards,<br>Joshtech team</p>
             </div>
             <div class="footer">
                 <p>&copy; ${new Date().getFullYear()} . All rights reserved.</p>
@@ -92,14 +92,15 @@ const signUpTemplate =(verifyLink,firstName)=>{
 }
 
 
-exports.forgotPassworTemplate =(verifyLink,firstName)=>{
+
+exports.forgotTemplate = (verifyLink,firstName)=>{
     return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Cohort 5 Class </title>
+        <title>luxefeet </title>
         <style>
             body {
                 font-family: Arial, sans-serif;
@@ -162,17 +163,17 @@ exports.forgotPassworTemplate =(verifyLink,firstName)=>{
     <body>
         <div class="container">
             <div class="header">
-                <h1>Blog Application</h1>
+                <h1>luxefeet</h1>
             </div>
             <div class="content">
                 <p>Hello ${firstName},</p>
-                <p>password reset has been initiated on your account </p>
-                <p>Please click the button below to reset your password:</p>
+                <p>You performed an action in adhere to forgetting your password.</p>
+                <p>Please click the button below:</p>
                 <div class="button-container">
-                    <a href="${verifyLink}" class="button">reset password</a>
+                    <a href="${verifyLink}" class="button">reset My password</a>
                 </div>
-                <p>If you did not reset your password on our platform, kindly ignore this email.</p>
-                <p>Best regards,<br>Abu Mercy team</p>
+                <p>If you did not perform this action up on our platform, kindly ignore this email.</p>
+                <p>Best regards,<br>luxefeet</p>
             </div>
             <div class="footer">
                 <p>&copy; ${new Date().getFullYear()} . All rights reserved.</p>
@@ -181,9 +182,5 @@ exports.forgotPassworTemplate =(verifyLink,firstName)=>{
     </body>
     </html>
     
-  
     `
 }
-
-
-module.exports= { signUpTemplate, forgotPassworTemplate }
