@@ -6,7 +6,10 @@ exports.registerSchema = joi.object().keys({
     password: joi.string().required(),
     confirmPassword: joi.string().required().valid(joi.ref('password')).required().messages({
         'any.only': 'Passwords do not match',
-    })
+    }),
+    username: joi.string().min(3).required(),
+
+
    
 })
 
@@ -14,8 +17,8 @@ exports.registerSchema = joi.object().keys({
 exports.loginSchema = joi.object().keys({
     email: joi.string().trim().min(3).email().required(),
     password: joi.string().required(),
-    
-})
+    username: joi.string().min(3).optional(),
+}).or('email', 'username') 
 
 
 exports.verificationEmailSchema = joi.object().keys({
