@@ -17,19 +17,21 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    maleImage : [{
-        type: String,
-        required: true
-    }],
-    femaleImage : [{
-        type: String,
-        required: true
-    }],
+    image: {
+        imageUrl: {
+            type: String,
+            required: true
+        },
+        publicId: {
+            type: String,
+            required: true
+        }
+    },
     sizes : [{
         type: String,
         required: true
     }],
-    
+
 },{timestamps: true})
 
 

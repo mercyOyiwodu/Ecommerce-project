@@ -6,13 +6,20 @@ const userSchema = new mongoose.Schema({
     },
     email : {
         type: String,
-        required: true
+        required: true,
+        lowercase: true
     },
     password : {
         type: String,
         required: true
 
     },
+    username : {
+        type: String,
+        lowercase: true
+        
+    },
+
     isVerified:{
         type: Boolean,
         default: false

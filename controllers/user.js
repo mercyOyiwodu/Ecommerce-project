@@ -18,7 +18,7 @@ exports.register = async (req, res) => {
         
         const validated = await validate(req.body , registerSchema)
         
-        const {fullName, email, password, confirmPassword} = validated
+        const {fullName, email, password, username, confirmPassword} = validated
 
         if(password !== confirmPassword) {
             return res.status(400).json({message: 'passwords do not match'})
@@ -39,6 +39,7 @@ exports.register = async (req, res) => {
             fullName,
             email,
             password: hashedPassword,
+            username
             
         
         })
@@ -77,17 +78,17 @@ exports.login = async (req, res) => {
     try {
         const validated = await validate(req.body , loginSchema)
 
-        const {email, password} = validated
+        const {email, password, username} = validated
 
-        if(!email) {
-            return res.status(400).json({message: 'please enter email'})    
+        if(!email && !username) {
+            return res.status(400).json({message: 'please enter either email or username'})    
         }
 
         if(!password) {
             return res.status(400).json({message: 'please enter your password'})    
         }
 
-        const user = await userModel.findOne({  email: email.toLowerCase()})
+        const user = await userModel.findOne({ $or: [{ email}, {username: username}]})
 
         if(user === null) {
             return res.status(404).json({message: 'user not found'})  
