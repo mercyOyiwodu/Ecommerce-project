@@ -10,7 +10,7 @@ exports.createProduct = async (req, res) => {
         const { description, price, category, sizes} = req.body
         
         const result = await cloudinary.uploader.upload(req.file.path)
-        fs.unlinkSync(req.file.path)
+        // fs.unlinkSync(req.file.path)
 
         const newProduct = new productModel({
              
