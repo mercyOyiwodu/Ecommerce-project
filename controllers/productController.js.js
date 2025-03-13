@@ -100,7 +100,7 @@ exports.updateProduct = async (req, res) => {
 
         
         const result = await cloudinary.uploader.upload(req.file.path)
-        fs.unlinkSync(req.file.path)
+        // fs.unlinkSync(req.file.path)
 
 
         const data = {
