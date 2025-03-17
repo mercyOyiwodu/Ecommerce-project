@@ -62,7 +62,7 @@ exports.register = async (req, res) => {
 
         await newUser.save()
 
-        res.status(201).json({message: 'user registered successfully', data: newUser, token})
+        res.status(201).json({message: 'user registered successfully', data: newUser })
 
     } catch (error) {
         console.log(error.message)
@@ -107,7 +107,7 @@ exports.login = async (req, res) => {
 
         const token = await jwt.sign({userId: user._id}, process.env.JWT_SECRET, { expiresIn:'1day'})
 
-        res.status(200).json({message: 'login successful', data: user, token})
+        res.status(200).json({message: 'login successful', data: user})
 
     } catch (error) {
         console.log(error.message)
@@ -200,10 +200,6 @@ exports.resendVerificationEmail = async (req, res) => {
         res.status(500).json({message: 'error resending verification email' + error.message})
     }
 }
-
-
-
-
 exports.forgotPassword = async (req, res) => {
     try {
 
@@ -241,9 +237,6 @@ exports.forgotPassword = async (req, res) => {
       })
     }
 };
-  
-
-
 
   
 exports.resetPassword = async (req, res) => {
