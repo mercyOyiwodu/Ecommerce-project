@@ -45,6 +45,7 @@ exports.initializePayment = async (req, res) => {
 
 
 
+
 exports.verifyPayment = async(req,res) => {
     try{
         const reference = req.params.reference
@@ -61,3 +62,7 @@ exports.verifyPayment = async(req,res) => {
         res.status(500).json({message: 'Internal Server Error'})
     }
 }
+
+
+
+

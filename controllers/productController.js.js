@@ -1,6 +1,7 @@
 // const userModel = require('../models/user')
 const productModel = require('../models/product')
 const cloudinary = require('../config/cloudinary')
+
 const fs = require('fs')
 
 
@@ -81,6 +82,7 @@ exports.getOneProduct = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
     try {
+        
         const {id} = req.params
 
         const { description, price, category, sizes} = req.body
