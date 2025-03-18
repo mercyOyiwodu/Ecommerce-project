@@ -107,7 +107,7 @@ exports.login = async (req, res) => {
 
         const token = await jwt.sign({userId: user._id}, process.env.JWT_SECRET, { expiresIn:'1day'})
 
-        res.status(200).json({message: 'login successful', data: user})
+        res.status(200).json({message: 'login successful', data: user, token})
 
     } catch (error) {
         console.log(error.message)
