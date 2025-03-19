@@ -7,6 +7,9 @@ const PORT = process.env.PORT || 3030
 
 const userRouter = require('./routes/user')
 const productRouter = require('./routes/productRouter')
+const cartRoute = require("./routes/cartRoute")
+
+
 
 const app = express()
 
@@ -15,6 +18,8 @@ app.use(express.json())
 
 app.use('/api/v1',userRouter)
 app.use('/api/v1',productRouter)
+app.use('/api/v1', cartRoute)
+
 
 app.listen(PORT,()=>{
     console.log(`server is listening to port ${PORT}`);
