@@ -215,7 +215,7 @@ exports.forgotPassword = async (req, res) => {
         })
       };
   
-      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '10mins' });
+      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1hour' });
       const link = `${req.protocol}://${req.get('host')}/api/v1/reset-password/${token}`; // consumed post link
       const firstName = user.fullName.split(' ')[0];
   
