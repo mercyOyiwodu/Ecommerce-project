@@ -44,7 +44,7 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'BASE_URL:',
+      title: 'BASE_URL: https://ecommerce-project-m2bb.onrender.com',
       version: '1.0.0',
     },
     components: {
