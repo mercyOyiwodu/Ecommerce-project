@@ -126,7 +126,7 @@ router.post('/createProduct',authenticate, upload.single('image'), createProduct
  */
 
 
-router.get('/getAllProducts',authenticate,  getAllProducts)
+router.get('/getAllProducts',  getAllProducts)
 
 /**
  * @swagger
@@ -166,7 +166,7 @@ router.get('/getAllProducts',authenticate,  getAllProducts)
  *                   example: internal server error
  */
 
-router.get('/getOneProduct/:id',authenticate, getOneProduct)
+router.get('/getOneProduct/:id', getOneProduct)
 
 
 /**
