@@ -66,7 +66,7 @@ exports.register = async (req, res) => {
 
     } catch (error) {
         console.log(error.message)
-        res.status(500).json({message: 'internal server error',  error: error.message})
+        res.status(500).json({message: 'error registering user',  error: error.message})
         
     }
 }
@@ -111,7 +111,7 @@ exports.login = async (req, res) => {
 
     } catch (error) {
         console.log(error.message)
-        res.status(500).json({message: 'internal server error' , error: error.message})
+        res.status(500).json({message: 'error loging user' , error: error.message})
     }
 }
 
@@ -200,6 +200,8 @@ exports.resendVerificationEmail = async (req, res) => {
         res.status(500).json({message: 'error resending verification email' + error.message})
     }
 }
+
+
 exports.forgotPassword = async (req, res) => {
     try {
 
@@ -239,6 +241,7 @@ exports.forgotPassword = async (req, res) => {
 };
 
   
+
 exports.resetPassword = async (req, res) => {
     try {
       const { token } = req.params;
