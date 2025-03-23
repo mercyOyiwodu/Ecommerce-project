@@ -13,7 +13,6 @@ exports.createProduct = async (req, res) => {
         // fs.unlinkSync(req.file.path)
 
         const newProduct = new productModel({
-             
             description,
             price, 
             category,
