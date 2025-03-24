@@ -4,7 +4,7 @@ const productModel =  require("../models/product")
 
 exports.addToCart = async (req, res) => {
     try {
-        const {productId, userId} = req.params
+        const {userId, productId} = req.params
         const {quantity} = req.body
 
         let checkExistingCart = await cartModel.findOne({user: userId})
