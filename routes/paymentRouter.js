@@ -12,3 +12,4 @@ router.get("/verify/:reference", authenticate, verifyPayment)
 
 module.exports = router
 
+
