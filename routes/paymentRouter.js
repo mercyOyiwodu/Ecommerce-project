@@ -8,7 +8,7 @@ const { authenticate } = require('../middlewares/authentication')
 
 router.post("/payment",authenticate, initializePayment)
 
-router.get("/payment/:reference",verifyPayment)
+router.get("/verify/:reference", authenticate, verifyPayment)
 
 module.exports = router
 
