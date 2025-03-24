@@ -78,7 +78,7 @@ exports.signUpTemplate = (verifyLink,firstName)=>{
                     <a href="${verifyLink}" class="button">Verify My Account</a>
                 </div>
                 <p>If you did not sign up on our platform, kindly ignore this email.</p>
-                <p>Best regards,<br>Joshtech team</p>
+                <p>Best regards,<br>luxefeet team</p>
             </div>
             <div class="footer">
                 <p>&copy; ${new Date().getFullYear()} . All rights reserved.</p>

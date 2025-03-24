@@ -62,11 +62,11 @@ exports.register = async (req, res) => {
 
         await newUser.save()
 
-        res.status(201).json({message: 'user registered successfully', data: newUser, token})
+        res.status(201).json({message: 'user registered successfully', data: newUser })
 
     } catch (error) {
         console.log(error.message)
-        res.status(500).json({message: 'internal server error',  error: error.message})
+        res.status(500).json({message: 'error registering user',  error: error.message})
         
     }
 }
@@ -111,7 +111,7 @@ exports.login = async (req, res) => {
 
     } catch (error) {
         console.log(error.message)
-        res.status(500).json({message: 'internal server error' , error: error.message})
+        res.status(500).json({message: 'error loging user' , error: error.message})
     }
 }
 
@@ -202,8 +202,6 @@ exports.resendVerificationEmail = async (req, res) => {
 }
 
 
-
-
 exports.forgotPassword = async (req, res) => {
     try {
 
@@ -219,8 +217,8 @@ exports.forgotPassword = async (req, res) => {
         })
       };
   
-      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '10mins' });
-      const link = `${req.protocol}://${req.get('host')}/api/v1/reset-password/${token}`; // consumed post link
+      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1hour' });
+      const link = `https://luxe-feet-dev.vercel.app/resetpassword/${token}`; // consumed post link
       const firstName = user.fullName.split(' ')[0];
   
       const mailOptions = {
@@ -241,11 +239,9 @@ exports.forgotPassword = async (req, res) => {
       })
     }
 };
-  
-
-
 
   
+
 exports.resetPassword = async (req, res) => {
     try {
       const { token } = req.params;

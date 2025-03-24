@@ -1,24 +1,25 @@
-// const userModel = require('../models/user')
-const productModel = require('../models/product')
+const womenModel = require('../models/womenProduct')
 const cloudinary = require('../config/cloudinary')
 
 const fs = require('fs')
 
 
-exports.createProduct = async (req, res) => {
+exports.createWomen = async (req, res) => {
     try {
         
         const { description, price, category, sizes} = req.body
         
         const result = await cloudinary.uploader.upload(req.file.path)
         // fs.unlinkSync(req.file.path)
+        
 
-        const newProduct = new productModel({
+        const newProduct = new womenModel({
+             
             description,
             price, 
             category,
             sizes,
-            image: {
+            womenImage: {
                 imageUrl: result.secure_url,
                 publicId: result.public_id
             }
@@ -30,22 +31,20 @@ exports.createProduct = async (req, res) => {
         res.status(201).json({message: 'product created successfully', data: newProduct})
 
 
-
     } catch (error) {
         console.log(error.message)
         res.status(500).json({message: 'internal server error' , error: error.message})
-        
     }
 }
 
 
 
-exports.getAllProducts = async (req, res) => {
+exports.getAllWomen = async (req, res) => {
     try {
         
-        const getProducts = await productModel.find()
+        const getProducts = await womenModel.find()
 
-        res.status(200).json({message: 'find below all products', data: getProducts})
+        res.status(200).json({message: 'find below all products for women', data: getProducts})
 
 
     } catch (error) {
@@ -56,18 +55,19 @@ exports.getAllProducts = async (req, res) => {
 
 
 
-exports.getOneProduct = async (req, res) => { 
+
+exports.getOneWomen = async (req, res) => { 
     try {
         
         const {id} = req.params
 
-        const product = await productModel.findById(id)
+        const product = await womenModel.findById(id)
 
         if(!product) {
             return res.status(404).json({message: 'product not found'})
         }
 
-        res.status(200).json({message: ' find below the product with the id', data: product})
+        res.status(200).json({message: ' find below the women product with the id', data: product})
 
 
     } catch (error) {
@@ -79,7 +79,8 @@ exports.getOneProduct = async (req, res) => {
 
 
 
-exports.updateProduct = async (req, res) => {
+
+exports.updateWomenProduct = async (req, res) => {
     try {
         
         const {id} = req.params
@@ -87,7 +88,7 @@ exports.updateProduct = async (req, res) => {
         const { description, price, category, sizes} = req.body
         
 
-        const product = await productModel.findById(id)
+        const product = await womenModel.findById(id)
 
         if(!product) {
             return res.status(404).json({message: 'product not found'})
@@ -95,7 +96,7 @@ exports.updateProduct = async (req, res) => {
         } else {
             if(req.file) {
 
-                await cloudinary.uploader.destroy(product.image.publicId)
+                await cloudinary.uploader.destroy(product.womenImage.publicId)
             }
         }
 
@@ -109,14 +110,14 @@ exports.updateProduct = async (req, res) => {
             price, 
             category,
             sizes,
-            image: {
+            womenImage: {
                 imageUrl: result.secure_url,
                 publicId: result.public_id
             }
 
         }
 
-        const newUpdate = await productModel.findByIdAndUpdate(id, data, {new: true})
+        const newUpdate = await womenModel.findByIdAndUpdate(id, data, {new: true})
 
         res.status(200).json({message: 'product has been updated successfully', data: newUpdate})
 
@@ -128,22 +129,23 @@ exports.updateProduct = async (req, res) => {
 }
 
 
-exports.deleteProduct = async (req, res) => {
+
+exports.deleteWomenProduct = async (req, res) => {
     try {
         const { id} = req.params
 
-        const product = await productModel.findById(id)
+        const product = await womenModel.findById(id)
 
         if(!product) { 
             return res.status(404).json({message: ' product not found'})
         }
 
-        const deletedUser = await productModel.findByIdAndDelete(id)
+        const deletedUser = await womenModel.findByIdAndDelete(id)
 
         
         if(deletedUser) {
 
-            await cloudinary.uploader.destroy(product.image.publicId)
+            await cloudinary.uploader.destroy(product.womenImage.publicId)
         }
 
         res.status(200).json({message: 'product has been deleted successfully', data: deletedUser})
@@ -154,6 +156,3 @@ exports.deleteProduct = async (req, res) => {
         res.status(500).json({message: 'internal server error' , error: error.message})
     }
 }
-
-
-
